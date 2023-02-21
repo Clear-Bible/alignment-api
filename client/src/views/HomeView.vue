@@ -1,9 +1,11 @@
-<script setup>
-import TheWelcome from "../components/TheWelcome.vue";
-</script>
+<script setup></script>
 
 <template>
   <main>
-    <TheWelcome />
+    <p>You've come across the alignment protoype.</p>
+
+    <h2>Available Alignments</h2>
+
+    <p>stuff here...</p>
   </main>
 </template>
