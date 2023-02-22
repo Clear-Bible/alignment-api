@@ -1,4 +1,27 @@
-<script setup></script>
+<script>
+import { fetchAlignments } from "../api/alignment.js";
+
+export default {
+  name: "HomeComponent",
+  components: {},
+  data() {
+    return {
+      alignments: [],
+    };
+  },
+  created() {
+    this.fetchAlignments();
+  },
+  methods: {
+    fetchAlignments() {
+      fetchAlignments().then((response) => {
+        console.log("RESP in component", response);
+        this.alignments = response;
+      });
+    },
+  },
+};
+</script>
 
 <template>
   <main>
@@ -6,6 +29,6 @@
 
     <h2>Available Alignments</h2>
 
-    <p>stuff here...</p>
+    <div>{{ alignments }}</div>
   </main>
 </template>
