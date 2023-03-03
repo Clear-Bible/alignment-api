@@ -6,7 +6,7 @@ export default {
   components: {},
   data() {
     return {
-      alignments: [],
+      alignmentData: {},
     };
   },
   created() {
@@ -16,7 +16,7 @@ export default {
     fetchAlignments() {
       fetchAlignments().then((response) => {
         console.log("RESP in component", response);
-        this.alignments = response;
+        this.alignmentData = response;
       });
     },
   },
@@ -29,6 +29,12 @@ export default {
 
     <h2>Available Alignments</h2>
 
-    <div>{{ alignments }}</div>
+    <div v-for="alignment in alignmentData.alignments" :key="alignment.id">
+      <h2>{{ alignment.id }}</h2>
+      <ul>
+        <li>source: {{ alignment.source }}</li>
+        <li>target: {{ alignment.target }}</li>
+      </ul>
+    </div>
   </main>
 </template>
