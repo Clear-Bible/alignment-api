@@ -6,7 +6,19 @@ class Resource(models.Model):
     lang = models.CharField(max_length=50)
 
 
-class Token(models.Model):
+# class Token(models.Model):
+#     token_id = models.CharField(max_length=15)
+#     resource = models.ForeignKey("Resource", on_delete=models.SET_NULL, null=True)
+#     text = models.CharField(max_length=150)
+
+
+class SourceToken(models.Model):
+    token_id = models.CharField(max_length=15)
+    resource = models.ForeignKey("Resource", on_delete=models.SET_NULL, null=True)
+    text = models.CharField(max_length=150)
+
+
+class TargetToken(models.Model):
     token_id = models.CharField(max_length=15)
     resource = models.ForeignKey("Resource", on_delete=models.SET_NULL, null=True)
     text = models.CharField(max_length=150)
@@ -24,5 +36,5 @@ class Alignment(models.Model):
 
 class Link(models.Model):
     alignment = models.ForeignKey("Alignment", on_delete=models.SET_NULL, null=True)
-    sourceTokens = models.ManyToManyField("Token", related_name="sourceTokens")
-    targetTokens = models.ManyToManyField("Token", related_name="targetTokens")
+    source_tokens = models.ManyToManyField(SourceToken, related_name="source_tokens")
+    target_tokens = models.ManyToManyField(TargetToken, related_name="target_tokens")
