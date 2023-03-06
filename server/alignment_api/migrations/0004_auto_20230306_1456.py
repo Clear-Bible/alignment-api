@@ -97,6 +97,8 @@ def import_links(
 
 
 def populate_data(apps, schema_editor):
+    # FIXME: deploy data
+    return
     resource_model = apps.get_model(app_label="alignment_api", model_name="Resource")
     source_token_model = apps.get_model(
         app_label="alignment_api", model_name="SourceToken"
