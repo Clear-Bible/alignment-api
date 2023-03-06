@@ -34,7 +34,10 @@ export default {
       <ul>
         <li>source: {{ alignment.source }}</li>
         <li>target: {{ alignment.target }}</li>
+        <li>number of links: {{ alignment.linkNum }}</li>
       </ul>
     </div>
+
+    {{ alignmentData }}
   </main>
 </template>
