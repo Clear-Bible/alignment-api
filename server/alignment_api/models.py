@@ -36,5 +36,8 @@ class Alignment(models.Model):
 
 class Link(models.Model):
     alignment = models.ForeignKey("Alignment", on_delete=models.SET_NULL, null=True)
-    source_tokens = models.ManyToManyField(SourceToken, related_name="source_tokens")
-    target_tokens = models.ManyToManyField(TargetToken, related_name="target_tokens")
+    source_tokens = models.ManyToManyField(SourceToken, related_name="links")
+    target_tokens = models.ManyToManyField(TargetToken, related_name="links")
+
+    def __str__(self):
+        return "{} {} {}".format(self.alignment, self.source_tokens, self.target_tokens)
