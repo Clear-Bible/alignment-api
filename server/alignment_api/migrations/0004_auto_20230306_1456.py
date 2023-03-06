@@ -19,6 +19,8 @@ def import_tokens(
     source_token_model, target_token_model, tsv_path, related_resource, type
 ):
     # count = 0
+    source_to_create = {}
+    target_to_create = {}
     with open(tsv_path) as file:
         tsv_file = csv.reader(file, delimiter="\t")
         for line in tqdm(tsv_file):
@@ -26,15 +28,16 @@ def import_tokens(
             # if count == 100:
             # break
             if type == "source":
-                new_token = source_token_model(
+                source_to_create[line[0]] = source_token_model(
                     token_id=line[0], resource=related_resource, text=line[6]
                 )
-                new_token.save()
             if type == "target":
-                new_token = target_token_model(
+                target_to_create[line[0]] = target_token_model(
                     token_id=line[0], resource=related_resource, text=line[2]
                 )
-                new_token.save()
+    source_token_model.objects.bulk_create(source_to_create.values())
+    target_token_model.objects.bulk_create(target_to_create.values())
+    return source_to_create, target_to_create
 
 
 def import_alignment(alignment_model, name, source, target):
@@ -53,6 +56,8 @@ def import_links(
     ylt_resource,
 ):
     print(f"Importing alignment: {alignment_data_path}")
+    source_tokens_lu = {t.token_id: t for t in na27_resource.sourcetoken_set.all()}
+    target_tokens_lu = {t.token_id: t for t in ylt_resource.targettoken_set.all()}
     with open(alignment_data_path, "r") as f:
         alignment_data = json.load(f)
         print(len(alignment_data))
@@ -65,19 +70,16 @@ def import_links(
             target_tokens = []
             for the_id in source_token_ids:
                 # print(f"retrieving source token: {the_id}")
-                token = source_token_model.objects.get(
-                    token_id=the_id, resource=na27_resource
-                )
+                token = source_tokens_lu[the_id]
                 source_tokens.append(token)
 
             for the_id in target_token_ids:
                 # print(f"retrieving target token: {the_id}")
-                token = target_token_model.objects.get(
-                    token_id=the_id, resource=ylt_resource
-                )
+                token = target_tokens_lu[the_id]
                 target_tokens.append(token)
 
             # print(f"Creating link for alignment {alignment.name}")
+            # TODO: Bulkify this too
             new_link = link_model(alignment=alignment)
             new_link.save()
             # print(f"saved link {new_link.id} {new_link.alignment.name}")
