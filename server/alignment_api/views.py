@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
-from .models import Alignment, Link
+from .models import Alignment, Link, SourceToken, TargetToken
 
 # Create your views here.
 
@@ -57,4 +57,26 @@ def get_alignment(request, alignment_name):
     response["source"] = alignment.source.name
     response["target"] = alignment.target.name
     response["linkNum"] = alignment.link_set.all().count()
+    return JsonResponse(response)
+
+
+def get_links(request, alignment_name):
+    # Return specified links or a few random ones
+    alignment = Alignment.objects.get(name=alignment_name)
+    source_token_ids = request.GET.getlist("source_tokens", "")
+
+    source_tokens = []
+    for source_token_id in source_token_ids:
+        found_tokens = SourceToken.objects.filter(
+            token_id__startswith=source_token_id, resource=alignment.source
+        )
+        source_tokens.extend(found_tokens)
+
+    links = []
+    for source_token in source_tokens:
+        links.extend(source_token.links.all())
+
+    response = {}
+    response["linkNum"] = len(links)
+    response["links"] = convert_links(links)
     return JsonResponse(response)
