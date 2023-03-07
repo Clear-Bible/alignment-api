@@ -31,7 +31,6 @@ def convert_links(links):
 
 
 def get_alignments(request):
-    print("get_existing_alignments")
     alignments = Alignment.objects.all()
     response = {}
     response["alignments"] = []
@@ -48,4 +47,14 @@ def get_alignments(request):
         # simplified_alignment["links"] = convert_links(alignment.link_set.all())
         response["alignments"].append(simplified_alignment)
 
+    return JsonResponse(response)
+
+
+def get_alignment(request, alignment_name):
+    alignment = Alignment.objects.get(name=alignment_name)
+    response = {}
+    response["id"] = alignment.name
+    response["source"] = alignment.source.name
+    response["target"] = alignment.target.name
+    response["linkNum"] = alignment.link_set.all().count()
     return JsonResponse(response)
