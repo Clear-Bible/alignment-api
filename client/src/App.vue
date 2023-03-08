@@ -20,6 +20,7 @@ header.main-header {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  margin-bottom: 24px;
 }
 
 nav.main-nav {

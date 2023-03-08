@@ -1,5 +1,5 @@
 <script>
-import { fetchAlignments } from "../api/alignment.js";
+import { fetchAlignments, fetchLinks } from "@/api/alignment.js";
 
 export default {
   name: "HomeComponent",
@@ -7,6 +7,11 @@ export default {
   data() {
     return {
       alignmentData: {},
+      selectedAlignment: "",
+      linkQueryScope: "",
+      loading: false,
+      links: null,
+      linkQueryResponseTime: "",
     };
   },
   created() {
@@ -14,10 +19,44 @@ export default {
   },
   methods: {
     fetchAlignments() {
+      this.loading = true;
       fetchAlignments().then((response) => {
-        console.log("RESP in component", response);
         this.alignmentData = response;
+        this.loading = false;
       });
+    },
+    fetchLinks() {
+      this.loading = true;
+      this.links = null;
+      fetchLinks(this.selectedAlignment, this.linkQueryScope).then(
+        (response) => {
+          this.links = response.response;
+          this.linkQueryResponseTime = response.time;
+          this.loading = false;
+        }
+      );
+    },
+  },
+  computed: {
+    summarizedLinks() {
+      return this.links.links.map((link) => {
+        const sourceTokenIds = link.sourceTokens
+          .map((src) => src.tokenId)
+          .flat();
+        const targetTokenIds = link.targetTokens
+          .map((target) => target.tokenId)
+          .flat();
+        return {
+          id: link.id,
+          summary: link.sourceTokens.reduce((acc, curr) => {
+            return `${acc} ${curr.text}`;
+          }, ""),
+          details: `source: ${sourceTokenIds}, target: ${targetTokenIds}`,
+        };
+      });
+    },
+    linkQueryResponseTimeShort() {
+      return this.linkQueryResponseTime.toFixed();
     },
   },
 };
@@ -25,19 +64,74 @@ export default {
 
 <template>
   <main>
-    <p>You've come across the alignment protoype.</p>
+    <h2>Find some links</h2>
+    <p>
+      This is a prototype. To explore the available data, select an alignment
+      and provide a scope to query links.
+    </p>
+    <ol>
+      <li>Select and alignment dataset to query.</li>
+      <li>
+        Provide a scope. Specify by:
+        <ul>
+          <li>book number, i.e. 42</li>
+          <li>book and chapter, i.e. 42001</li>
+          <li>full bcv, i.e. 42001001</li>
+          <li>
+            combine scopes i.e. 42001001,4200001002 (comma separation, no space)
+          </li>
+        </ul>
+      </li>
+    </ol>
 
-    <h2>Available Alignments</h2>
+    <fieldset name="Query Links">
+      <legend>Query Links</legend>
+      <label
+        >Selected alignment
+        <select v-model="selectedAlignment">
+          <option disabled value="">Please select an alignment</option>
+          <option
+            v-for="alignment in alignmentData.alignments"
+            :key="alignment.id"
+          >
+            {{ alignment.id }}
+          </option>
+        </select>
+      </label>
 
-    <div v-for="alignment in alignmentData.alignments" :key="alignment.id">
-      <h2>{{ alignment.id }}</h2>
-      <ul>
-        <li>source: {{ alignment.source }}</li>
-        <li>target: {{ alignment.target }}</li>
-        <li>number of links: {{ alignment.linkNum }}</li>
-      </ul>
+      <label>
+        Link query scope
+        <input v-model="linkQueryScope" type="text" />
+      </label>
+
+      <button v-on:click="fetchLinks" :disabled="!selectedAlignment">
+        Get Links
+      </button>
+    </fieldset>
+
+    <div v-if="loading">Loading...</div>
+
+    <div v-if="links">
+      <p>
+        Success! {{ links.linkNum }} links found
+        <em>( {{ linkQueryResponseTimeShort }} ms )</em>
+      </p>
+
+      <details
+        v-for="summarizedLink in summarizedLinks"
+        :key="summarizedLink.id"
+      >
+        <summary>{{ summarizedLink.summary }}</summary>
+        {{ summarizedLink.details }}
+      </details>
     </div>
-
-    {{ alignmentData }}
   </main>
 </template>
+
+<style scoped>
+fieldset label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+</style>
