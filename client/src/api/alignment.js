@@ -1,9 +1,17 @@
+function getBaseUrl() {
+  if (import.meta.env.PROD) {
+    return "https://clear-alignment-api.herokuapp.com";
+  }
+  return "/api-local";
+}
+
 export const fetchAlignments = async () => {
   console.info("Fetcher called");
   console.log("prod?", import.meta.env.PROD);
+  const baseUrl = getBaseUrl();
   let response = null;
   try {
-    response = await fetch("/api-remote/alignment/");
+    response = await fetch(`${baseUrl}/alignment/`);
   } catch (error) {
     console.error("Could not fetch", error, response);
   }
@@ -16,8 +24,10 @@ export const fetchLinks = async (alignmentName, linkQueryScope) => {
   let end = null;
 
   const scopes = linkQueryScope.split(",");
+  const baseUrl = getBaseUrl();
+
   try {
-    const baseUrl = `/api-remote/alignment/${alignmentName}/links?`;
+    const linksUrl = `${baseUrl}/alignment/${alignmentName}/links?`;
 
     const fullUrl = scopes.reduce((acc, curr, idx, arr) => {
       let reduced = acc;
@@ -28,7 +38,7 @@ export const fetchLinks = async (alignmentName, linkQueryScope) => {
       }
 
       return reduced;
-    }, baseUrl);
+    }, linksUrl);
 
     start = performance.now();
     response = await fetch(fullUrl);
