@@ -1,5 +1,6 @@
 export const fetchAlignments = async () => {
   console.info("Fetcher called");
+  console.log("prod?", import.meta.env.PROD);
   let response = null;
   try {
     response = await fetch("/api-remote/alignment/");
