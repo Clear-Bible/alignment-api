@@ -13,11 +13,17 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
+      "/api-local": {
         target: "http://localhost:8000",
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        rewrite: (path) => path.replace(/^\/api-local/, ""),
+      },
+      "/api-remote": {
+        target: "https://clear-alignment-api.herokuapp.com",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api-remote/, ""),
       },
     },
   },

@@ -2,7 +2,7 @@ export const fetchAlignments = async () => {
   console.info("Fetcher called");
   let response = null;
   try {
-    response = await fetch("/api/alignment/");
+    response = await fetch("/api-remote/alignment/");
   } catch (error) {
     console.error("Could not fetch", error, response);
   }
@@ -16,7 +16,7 @@ export const fetchLinks = async (alignmentName, linkQueryScope) => {
 
   const scopes = linkQueryScope.split(",");
   try {
-    const baseUrl = `/api/alignment/${alignmentName}/links?`;
+    const baseUrl = `/api-remote/alignment/${alignmentName}/links?`;
 
     const fullUrl = scopes.reduce((acc, curr, idx, arr) => {
       let reduced = acc;
