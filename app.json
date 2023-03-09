@@ -1,0 +1,21 @@
+ {
+  "name": "alignmentapi",
+
+  "env": {},
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "hobby"
+    }
+  },
+  "addons": [
+      {
+          "plan": "heroku-postgresql:hobby-dev",
+      }
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/negativetwelve/heroku-buildpack-subdir"
+    }
+  ]
+}
