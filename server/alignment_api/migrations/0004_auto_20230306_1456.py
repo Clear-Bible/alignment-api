@@ -6,7 +6,7 @@ from django.db import migrations
 
 from tqdm import tqdm
 
-DATA_PATH = settings.BASE_DIR / "../data/data"
+DATA_PATH = settings.BASE_DIR / "data/data"
 
 
 def import_resource(resource_model, name, lang):
@@ -60,7 +60,6 @@ def import_links(
     target_tokens_lu = {t.token_id: t for t in ylt_resource.targettoken_set.all()}
     with open(alignment_data_path, "r") as f:
         alignment_data = json.load(f)
-        print(len(alignment_data))
         for link in tqdm(alignment_data):
             id = list(link.keys())[0]
             extracted_link = list(link.values())[0]
@@ -69,37 +68,28 @@ def import_links(
             source_tokens = []
             target_tokens = []
             for the_id in source_token_ids:
-                # print(f"retrieving source token: {the_id}")
                 token = source_tokens_lu[the_id]
                 source_tokens.append(token)
 
             for the_id in target_token_ids:
-                # print(f"retrieving target token: {the_id}")
                 token = target_tokens_lu[the_id]
                 target_tokens.append(token)
 
-            # print(f"Creating link for alignment {alignment.name}")
             # TODO: Bulkify this too
             new_link = link_model(alignment=alignment)
             new_link.save()
-            # print(f"saved link {new_link.id} {new_link.alignment.name}")
-            # print("add tokens")
             for source_token in source_tokens:
                 # print(
                 #     f"adding source_token to link {source_token} {source_token.token_id}"
                 # )
                 new_link.source_tokens.add(source_token)
 
-            # print(f"source token count: {new_link.source_tokens.count()}")
-
             for target_token in target_tokens:
                 # print(
                 #     f"adding target_token to link {target_token} {target_token.token_id}"
                 # )
                 new_link.target_tokens.add(target_token)
-            # print(f"target token count: {new_link.target_tokens.count()}")
 
-            # print("second save")
             # new_link.save()
 
 
