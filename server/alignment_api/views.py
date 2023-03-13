@@ -3,6 +3,9 @@ from django.shortcuts import render
 
 from .models import Alignment, Link, SourceToken, TargetToken
 
+from rest_framework import viewsets, permissions
+from .serializers import AlignmentSerializer
+
 # Create your views here.
 
 
@@ -28,6 +31,16 @@ def convert_links(links):
         converted_link["targetTokens"] = convert_tokens(link.target_tokens.values())
         converted_links.append(converted_link)
     return converted_links
+
+
+class AlignmentViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+
+    queryset = Alignment.objects.all()
+    serializer_class = AlignmentSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 def get_alignments(request):

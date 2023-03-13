@@ -5,6 +5,9 @@ class Resource(models.Model):
     name = models.CharField(max_length=100)
     lang = models.CharField(max_length=50)
 
+    def __str__(self):
+        return "{}: {} ({})".format(self.id, self.name, self.lang)
+
 
 # class Token(models.Model):
 #     token_id = models.CharField(max_length=15)
