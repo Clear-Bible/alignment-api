@@ -6,7 +6,7 @@ export default {
   components: {},
   data() {
     return {
-      alignmentData: {},
+      alignments: [],
       selectedAlignment: "",
       linkQueryScope: "",
       loading: false,
@@ -21,7 +21,7 @@ export default {
     fetchAlignments() {
       this.loading = true;
       fetchAlignments().then((response) => {
-        this.alignmentData = response;
+        this.alignments = response;
         this.loading = false;
       });
     },
@@ -39,16 +39,16 @@ export default {
   },
   computed: {
     summarizedLinks() {
-      return this.links.links.map((link) => {
-        const sourceTokenIds = link.sourceTokens
-          .map((src) => src.tokenId)
+      return this.links.map((link) => {
+        const sourceTokenIds = link.source_tokens
+          .map((src) => src.token_id)
           .flat();
-        const targetTokenIds = link.targetTokens
-          .map((target) => target.tokenId)
+        const targetTokenIds = link.target_tokens
+          .map((target) => target.token_id)
           .flat();
         return {
-          id: link.id,
-          summary: link.sourceTokens.reduce((acc, curr) => {
+          id: link.token_id,
+          summary: link.source_tokens.reduce((acc, curr) => {
             return `${acc} ${curr.text}`;
           }, ""),
           details: `source: ${sourceTokenIds}, target: ${targetTokenIds}`,
@@ -91,10 +91,11 @@ export default {
         <select v-model="selectedAlignment">
           <option disabled value="">Please select an alignment</option>
           <option
-            v-for="alignment in alignmentData.alignments"
+            v-for="alignment in alignments"
             :key="alignment.id"
+            :value="alignment.id"
           >
-            {{ alignment.id }}
+            {{ alignment.name }}
           </option>
         </select>
       </label>
@@ -113,7 +114,7 @@ export default {
 
     <div v-if="links">
       <p>
-        Success! {{ links.linkNum }} links found
+        Success! {{ links.length }} links found
         <em>( {{ linkQueryResponseTimeShort }} ms )</em>
       </p>
 
