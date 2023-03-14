@@ -3,8 +3,8 @@ from django.shortcuts import render
 
 from .models import Alignment, Link, SourceToken, TargetToken
 
-from rest_framework import viewsets, permissions
-from .serializers import AlignmentSerializer
+from .serializers import AlignmentSerializer, LinkSerializer
+from rest_framework import viewsets, permissions, generics, status
 
 # Create your views here.
 
@@ -35,7 +35,7 @@ def convert_links(links):
 
 class AlignmentViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint that allows alignments to be viewed.
     """
 
     queryset = Alignment.objects.all()
@@ -73,10 +73,38 @@ def get_alignment(request, alignment_name):
     return JsonResponse(response)
 
 
+class LinkList(generics.ListAPIView):
+    """
+    API endpoint that allows links to be viewed by alignment and scope.
+    """
+
+    serializer_class = LinkSerializer
+
+    def get_queryset(self):
+        print("MIKEY", self.kwargs)
+        alignment_id = self.kwargs["alignment"]
+        alignment = Alignment.objects.get(id=alignment_id)
+        print(f"found alignment {alignment}")
+        scopes = self.request.query_params.getlist("source_token")
+        print("MIKEY", scopes)
+
+        source_tokens_in_scope = []
+        for scope in scopes:
+            scoped_tokens = SourceToken.objects.filter(
+                token_id__startswith=scope, resource=alignment.source
+            )
+            source_tokens_in_scope.extend(scoped_tokens)
+
+        print(f" num scoped: {len(source_tokens_in_scope)}")
+        return Link.objects.filter(
+            alignment=alignment, source_tokens__in=source_tokens_in_scope
+        )
+
+
 def get_links(request, alignment_name):
     # Return specified links or a few random ones
-    alignment = Alignment.objects.get(name=alignment_name)
     source_token_ids = request.GET.getlist("source_tokens", "")
+    alignment = Alignment.objects.get(name=alignment_name)
 
     source_tokens = []
     for source_token_id in source_token_ids:

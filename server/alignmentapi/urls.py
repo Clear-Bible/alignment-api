@@ -22,10 +22,12 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r"alignments", views.AlignmentViewSet)
+# router.register(r"links", views.LinkList, basename="Link")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("alignment/", include("alignment_api.urls")),
     path("alignment-rest/", include(router.urls)),
+    path("alignment-rest/alignments/<str:alignment>/links", views.LinkList.as_view()),
     path("rest-auth/", include("rest_framework.urls", namespace="rest_framework")),
 ]

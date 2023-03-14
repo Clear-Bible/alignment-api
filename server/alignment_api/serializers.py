@@ -9,4 +9,10 @@ class AlignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Alignment
-        fields = ["name", "source", "target"]
+        fields = ["id", "name", "source", "target"]
+
+
+class LinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Link
+        fields = ["alignment", "source_tokens", "target_tokens"]
