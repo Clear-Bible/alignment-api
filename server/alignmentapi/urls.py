@@ -16,7 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from alignment_api import views
+from rest_framework import routers
+
+
+router = routers.DefaultRouter()
+router.register(r"alignments", views.AlignmentViewSet)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("alignment/", include("alignment_api.urls")),
+    path("api/", include(router.urls)),
+    path("api/alignments/<str:alignment>/links", views.LinkList.as_view()),
+    path("rest-auth/", include("rest_framework.urls", namespace="rest_framework")),
 ]
