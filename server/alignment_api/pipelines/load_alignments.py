@@ -15,7 +15,6 @@ from alignment_api.models import SourceToken, TargetToken, Resource, Alignment, 
 DATA_PATH = settings.BASE_DIR / "data/data"
 SOURCES_PATH = DATA_PATH / "sources"
 TARGETS_PATH = DATA_PATH / "targets"
-alignment_targets = ["YLT", "CUVMP"]
 CATALOG = []
 
 
@@ -45,6 +44,10 @@ def load_catalog():
             new_entry["target_license"] = target_license
             CATALOG.append(new_entry)
 
+    CATALOG.sort(key=lambda x: x["target"])
+    CATALOG.reverse()  # Load YLT alignments first.
+    CATALOG.pop(2)  # Ditch NET.
+
 
 def get_alignment_pairs_for_target(target_name):
     source_oriented_pairs = os.listdir(SOURCES_PATH)
@@ -67,7 +70,6 @@ def get_or_create_resource(resource_name, lang):
         print(f"\t get {resource_name}")
         return Resource.objects.get(name=resource_name)
 
-    # TODO: support language ingestion
     print(f"\t create {resource_name}")
     new_resource = Resource(name=resource_name, lang=lang)
     new_resource.save()
@@ -76,11 +78,11 @@ def get_or_create_resource(resource_name, lang):
 
 def import_source_tokens(path, resource):
     to_create = {}
-    count = SourceToken.objects.filter(resource=resource).count()
 
-    if count == 0 and os.path.isfile(path):
+    if os.path.isfile(path):
         with open(path) as file:
             tsv_file = csv.reader(file, delimiter="\t")
+            next(tsv_file)  # skip header
             for line in tqdm(tsv_file, desc=f"\t source tokens for {resource.name}"):
                 to_create[line[0]] = SourceToken(
                     token_id=line[0],
@@ -90,16 +92,24 @@ def import_source_tokens(path, resource):
                     text=line[6],
                 )
 
+    token_ids = list(to_create.keys())
+    first_token_id = token_ids[0]
+    token_exists = SourceToken.objects.filter(
+        token_id=first_token_id, resource=resource
+    ).exists()
+
+    if not token_exists:
+        print(f"\t bulk save")
         SourceToken.objects.bulk_create(to_create.values())
 
 
 def import_target_tokens(path, resource):
     to_create = {}
-    count = TargetToken.objects.filter(resource=resource).count()
 
-    if count == 0 and os.path.isfile(path):
+    if os.path.isfile(path):
         with open(path) as file:
             tsv_file = csv.reader(file, delimiter="\t")
+            next(tsv_file)  # skip header
             for line in tqdm(tsv_file, desc=f"\t target tokens for {resource.name}"):
                 to_create[line[0]] = TargetToken(
                     token_id=line[0],
@@ -108,6 +118,15 @@ def import_target_tokens(path, resource):
                     resource=resource,
                 )
 
+        # TargetToken.objects.bulk_create(to_create.values())
+    token_ids = list(to_create.keys())
+    first_token_id = token_ids[0]
+    token_exists = TargetToken.objects.filter(
+        token_id=first_token_id, resource=resource
+    ).exists()
+
+    if not token_exists:
+        print(f"\t bulk save")
         TargetToken.objects.bulk_create(to_create.values())
 
 
@@ -122,7 +141,9 @@ def import_links(alignment, source_resource, target_resource):
     print(f"\t links for {alignment.name}")
     ALIGNMENT_DATA_PATH = f"{DATA_PATH}/alignments/{target_resource.lang}/{target_resource.name}/{alignment.name}-{alignment.type}.json"
     source_tokens_lu = {t.token_id: t for t in source_resource.sourcetoken_set.all()}
+    print("source token sample: ", list(source_tokens_lu.items())[0])
     target_tokens_lu = {t.token_id: t for t in target_resource.targettoken_set.all()}
+    print("target token sample: ", list(target_tokens_lu.items())[0])
     links = []
     with open(ALIGNMENT_DATA_PATH, "r") as f:
         alignment_data = json.load(f)
@@ -130,9 +151,6 @@ def import_links(alignment, source_resource, target_resource):
             new_link = Link(alignment=alignment)
             links.append(new_link)
 
-            # TODO: Bulkify this too
-
-            # new_link.save()
         created_links = Link.objects.bulk_create(links)
 
         with transaction.atomic():
@@ -155,19 +173,8 @@ def import_links(alignment, source_resource, target_resource):
                     token = target_tokens_lu[the_id]
                     target_tokens.append(token)
 
-                # for source_token in source_tokens:
-                # print(
-                #     f"adding source_token to link {source_token} {source_token.token_id}"
-                # )
                 created_links[idx].source_tokens.add(*source_tokens)
-
-                # for target_token in target_tokens:
-                # print(
-                #     f"adding target_token to link {target_token} {target_token.token_id}"
-                # )
                 created_links[idx].target_tokens.add(*target_tokens)
-
-                # new_link.save()
 
 
 def load_alignments(reset=True):
@@ -194,7 +201,7 @@ def load_alignments(reset=True):
 
     load_catalog()
 
-    for entry in [CATALOG[1]]:
+    for entry in CATALOG:
         name = f"{entry['source']}-{entry['target']}"
         print(f"INGEST {name}")
         source_resource = get_or_create_resource(entry["source"], entry["lang"])
@@ -214,71 +221,6 @@ def load_alignments(reset=True):
         )
 
         import_links(alignment, source_resource, target_resource)
-
-    # for alignment_pair in alignment_pairs:
-
-    # for target_name in alignment_targets:
-    #     print(f"INGEST {target_name}")
-    #     source_names = determine_source_names_for_target(target_name)
-
-    #     source_resources = []
-    #     for source_name in source_names:
-    #         source_resources.append(get_or_create_resource(source_name))
-
-    #     for source_resource in source_resources:
-    #         import_source_tokens(
-    #             f"{DATA_PATH}/sources/{source_resource.name}-{target_name}.tsv",
-    #             source_resource,
-    #         )
-
-    # source_token_path = DATA_PATH / "sources/NA27-YLT.tsv"
-    # target_token_path = DATA_PATH / "targets/NA27-YLT.tsv"
-
-    # source_resource = get_or_create_resource()
-
-    # Import NA27
-    # - Resource
-    # - Token(s)
-    # print("import na27")
-    # na27_resource = import_resource(resource_model, "na27", "grk")
-    # import_tokens(
-    #     source_token_model,
-    #     target_token_model,
-    #     DATA_PATH / "sources/NA27-YLT.tsv",
-    #     na27_resource,
-    #     "source",
-    # )
-
-    # Import YLT
-    # - Resource
-    # - Token(s)
-    # print("import ylt")
-    # ylt_resource = import_resource(resource_model, "ylt", "eng")
-    # import_tokens(
-    #     source_token_model,
-    #     target_token_model,
-    #     DATA_PATH / "targets/NA27-YLT.tsv",
-    #     ylt_resource,
-    #     "target",
-    # )
-
-    # Import NA27 / YLT Alignment
-    # - Alignment
-    # - Link(s)
-    # print("import na27-ylt alignment")
-    # na27_ylt_alignment = import_alignment(
-    #     alignment_model, "NA27-YLT", na27_resource, ylt_resource
-    # )
-    # print(f"import na27-ylt links with alignment {na27_ylt_alignment}")
-    # import_links(
-    #     link_model,
-    #     source_token_model,
-    #     target_token_model,
-    #     na27_ylt_alignment,
-    #     DATA_PATH / "alignments/eng/YLT/NA27-YLT-manual.json",
-    #     na27_resource,
-    #     ylt_resource,
-    # )
 
 
 if __name__ in {"__main__", "django.core.management.commands.shell"}:
