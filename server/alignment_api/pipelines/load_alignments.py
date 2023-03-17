@@ -46,7 +46,6 @@ def load_catalog():
 
     CATALOG.sort(key=lambda x: x["target"])
     CATALOG.reverse()  # Load YLT alignments first.
-    CATALOG.pop(2)  # Ditch NET.
 
 
 def get_alignment_pairs_for_target(target_name):
@@ -141,9 +140,7 @@ def import_links(alignment, source_resource, target_resource):
     print(f"\t links for {alignment.name}")
     ALIGNMENT_DATA_PATH = f"{DATA_PATH}/alignments/{target_resource.lang}/{target_resource.name}/{alignment.name}-{alignment.type}.json"
     source_tokens_lu = {t.token_id: t for t in source_resource.sourcetoken_set.all()}
-    print("source token sample: ", list(source_tokens_lu.items())[0])
     target_tokens_lu = {t.token_id: t for t in target_resource.targettoken_set.all()}
-    print("target token sample: ", list(target_tokens_lu.items())[0])
     links = []
     with open(ALIGNMENT_DATA_PATH, "r") as f:
         alignment_data = json.load(f)
