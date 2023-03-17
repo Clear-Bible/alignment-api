@@ -36,6 +36,13 @@ export DATABASE_URL=postgres://localhost/alignmentapi
 poetry run ./manage.py migrate
 ```
 
+### Populate alignment database
+_runtime ~20 mins_
+
+```cli
+poetry run ./manage.py shell < alignment_api/pipelines/load_alignments.py
+```
+
 ### Start local server
 
 ```cli
