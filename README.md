@@ -6,12 +6,12 @@ A prototype for storing and serving alignment data.
 In the `client/` directory...
 
 ### Install dependencies
-```cli
+```bash
 npm install
 ```
 
 ### Start local server
-```cli
+```bash
 npm run dev
 ```
 ...
@@ -20,25 +20,32 @@ npm run dev
 In the `server/` directory...
 
 ### Install dependencies
-```cli
+```bash
 poetry install
 ```
 
 ### Optional: Use PostgreSQL
-```cli
+```bash
 createdb alignmentapi
 export DATABASE_URL=postgres://localhost/alignmentapi
 ```
 
 ### Run initial migrations
 
-```cli
+```bash
 poetry run ./manage.py migrate
+```
+
+### Populate alignment database
+_runtime ~20 mins_
+
+```bash
+poetry run ./manage.py shell < alignment_api/pipelines/load_alignments.py
 ```
 
 ### Start local server
 
-```cli
+```bash
 poetry run ./manage.py runserver
 ```
 
@@ -46,26 +53,26 @@ poetry run ./manage.py runserver
 
 - Get access to the app on Heroku
 - Authenticate using the [Heroku CLI](postgres://localhost/alignmentapi):
-```cli
+```bash
 heroku login
 ```
 - Link the site to the Heroku app:
-```cli
+```bash
 heroku git:remote -a clear-alignment-api
 ```
 - Deploy via Git push
-```cli
+```bash
 git push heroku <branch-name>:main
 ```
 
 ## Update Data on Heroku
 - Put site into maintenance mode
-```cli
+```bash
 heroku maintenance
 :on
 ```
 - Reset the existing database
-```cli
+```bash
 heroku pg:reset DATABASE --confirm clear-alignment-api
 ```
 - Push local database up to Heroku
@@ -73,7 +80,7 @@ heroku pg:reset DATABASE --confirm clear-alignment-api
 heroku pg:push alignmentapi DATABASE
 ```
 - Take site out of maintenance mode
-```cli
+```bash
 heroku maintenance:off
 ```
 - Browse to /alignment
