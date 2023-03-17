@@ -68,16 +68,19 @@ git push heroku <branch-name>:main
 ## Update Data on Heroku
 - Put site into maintenance mode
 ```bash
-heroku maintenance
-:on
+heroku maintenance:on
 ```
 - Reset the existing database
 ```bash
 heroku pg:reset DATABASE --confirm clear-alignment-api
 ```
 - Push local database up to Heroku
-```
+```bash
 heroku pg:push alignmentapi DATABASE
+```
+- _if using db auth locally_...
+```bash
+heroku pg:push $(echo $DATABASE_URL) DATABASE
 ```
 - Take site out of maintenance mode
 ```bash
