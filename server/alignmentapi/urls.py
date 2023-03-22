@@ -16,9 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from alignment_api import views
-from rest_framework import routers
+from strawberry.django.views import GraphQLView
 
+from alignment_api import views
+from alignment_api.schema import schema
+from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r"alignments", views.AlignmentViewSet)
@@ -29,4 +31,5 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("api/alignments/<str:alignment>/links", views.LinkList.as_view()),
     path("rest-auth/", include("rest_framework.urls", namespace="rest_framework")),
+    path("graphql/", GraphQLView.as_view(schema=schema)),
 ]

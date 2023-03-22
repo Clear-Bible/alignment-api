@@ -16,6 +16,7 @@ wsgi-basic-auth = "^1.1.0"
 tqdm = "^4.65.0"
 django-cors-headers = "^3.14.0"
 djangorestframework = "^3.14.0"
+strawberry-graphql-django = "^0.9.2"
 
 [tool.poetry.dev-dependencies]
 black = "^23.1.0"
