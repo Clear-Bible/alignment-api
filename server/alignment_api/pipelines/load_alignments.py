@@ -12,14 +12,16 @@ from tqdm import tqdm
 
 from alignment_api.models import SourceToken, TargetToken, Resource, Alignment, Link
 
-DATA_PATH = settings.BASE_DIR / "data/data"
-SOURCES_PATH = DATA_PATH / "sources"
-TARGETS_PATH = DATA_PATH / "targets"
+INTERNAL_DATA_PATH = settings.BASE_DIR / "data/internal-alignments/data"
+DATA_PATH = settings.BASE_DIR / "data/alignments/data"
+CATALOG_PATH = DATA_PATH / "catalog.tsv"
+
+SOURCES_PATH = INTERNAL_DATA_PATH / "sources"
+TARGETS_PATH = INTERNAL_DATA_PATH / "targets"
 CATALOG = []
 
 
 def load_catalog():
-    CATALOG_PATH = DATA_PATH / "catalog.tsv"
     with open(CATALOG_PATH) as file:
         tsv_file = csv.reader(file, delimiter="\t")
         next(tsv_file)  # skip header
@@ -88,7 +90,7 @@ def import_source_tokens(path, resource):
                     resource=resource,
                     gloss=line[4],
                     lemma=line[6],
-                    text=line[6],
+                    text=line[2],
                 )
 
     token_ids = list(to_create.keys())
@@ -205,11 +207,11 @@ def load_alignments(reset=True):
         target_resource = get_or_create_resource(entry["target"], entry["lang"])
 
         import_source_tokens(
-            f"{DATA_PATH}/sources/{entry['source']}-{entry['target']}.tsv",
+            f"{SOURCES_PATH}/{entry['source']}-{entry['target']}.tsv",
             source_resource,
         )
         import_target_tokens(
-            f"{DATA_PATH}/targets/{entry['source']}-{entry['target']}.tsv",
+            f"{TARGETS_PATH}/{entry['source']}-{entry['target']}.tsv",
             target_resource,
         )
 
