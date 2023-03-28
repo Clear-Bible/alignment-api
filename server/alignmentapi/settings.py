@@ -80,7 +80,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "alignmentapi.wsgi.application"
 
-CORS_ALLOWED_ORIGINS = ["https://vocal-piroshki-b3c6dc.netlify.app"]
+CORS_ALLOWED_ORIGINS = [
+    "https://vocal-piroshki-b3c6dc.netlify.app",
+    "http://localhost:8080",
+]
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
