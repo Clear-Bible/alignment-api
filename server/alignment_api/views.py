@@ -1,9 +1,14 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
-from .models import Alignment, Link, SourceToken, TargetToken
+from .models import Alignment, Link, SourceToken, TargetToken, Resource
 
-from .serializers import AlignmentSerializer, LinkSerializer, LinkReadSerializer
+from .serializers import (
+    AlignmentSerializer,
+    LinkSerializer,
+    LinkReadSerializer,
+    TargetTokenSerializer,
+)
 from rest_framework import viewsets, permissions, generics, status
 
 
@@ -15,7 +20,27 @@ class AlignmentViewSet(viewsets.ModelViewSet):
     queryset = Alignment.objects.all()
     serializer_class = AlignmentSerializer
 
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class TargetTokenViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    serializer_class = TargetTokenSerializer
+
+    def get_queryset(self):
+        resource_id = self.kwargs["resource"]
+        resource = Resource.objects.get(id=resource_id)
+        scopes = self.request.query_params.getlist("target_tokens")
+
+        target_tokens_in_scope = []
+        for scope in scopes:
+            scoped_tokens = []
+            scoped_tokens.extend(
+                TargetToken.objects.filter(
+                    token_id__startswith=scope, resource=resource
+                )
+            )
+            target_tokens_in_scope.extend(scoped_tokens)
+
+        return target_tokens_in_scope
 
 
 class LinkList(generics.ListAPIView):

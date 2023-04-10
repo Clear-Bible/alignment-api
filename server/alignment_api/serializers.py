@@ -24,7 +24,7 @@ class SourceTokenSerializer(serializers.ModelSerializer):
 class TargetTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = TargetToken
-        fields = ["id", "token_id", "resource", "text"]
+        fields = ["id", "token_id", "resource", "text", "is_punc"]
 
 
 class LinkReadSerializer(LinkSerializer):

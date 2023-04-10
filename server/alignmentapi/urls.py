@@ -28,5 +28,9 @@ urlpatterns = [
     path("alignment/", include("alignment_api.urls")),
     path("api/", include(router.urls)),
     path("api/alignments/<str:alignment>/links", views.LinkList.as_view()),
+    path(
+        "api/resources/<str:resource>",
+        views.TargetTokenViewSet.as_view({"get": "list"}),
+    ),
     path("rest-auth/", include("rest_framework.urls", namespace="rest_framework")),
 ]
