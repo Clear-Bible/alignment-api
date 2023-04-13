@@ -81,8 +81,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "alignmentapi.wsgi.application"
 
 CORS_ALLOWED_ORIGINS = [
-    "https://vocal-piroshki-b3c6dc.netlify.app",
-    "http://localhost:8080",
+    "https://vocal-piroshki-b3c6dc.netlify.app",  # Alignment API Frontend
+    "http://localhost:8080",  # Local development
+    "https://deploy-preview-237--doric-symphony-preview.netlify.app",  # Symphony Browser Deploy Preview
 ]
 
 # Database
