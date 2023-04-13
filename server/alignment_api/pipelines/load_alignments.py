@@ -115,7 +115,7 @@ def import_target_tokens(path, resource):
                 to_create[line[0]] = TargetToken(
                     token_id=line[0],
                     text=line[2],
-                    is_punc=bool(line[4]),
+                    is_punc=bool(line[4] == "True"),
                     resource=resource,
                 )
 
