@@ -1,4 +1,4 @@
-A prototype for storing and serving alignment data.
+A prototype API for accessing alignment data. Built with Django. Serves up data from [Clear-Bible/Alignments](https://github.com/Clear-Bible/Alignments).
 
 # Local Development
 
