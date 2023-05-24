@@ -113,6 +113,23 @@ def import_source_tokens(path, resource):
         SourceToken.objects.bulk_create(to_create.values())
 
 
+def import_source_token_subjects():
+    SUBJECT_TOKEN_REFS_DATA_PATH = f"{TEST_DATA_PATH}/subject_token_refs.json"
+
+    with open(SUBJECT_TOKEN_REFS_DATA_PATH, "r") as f:
+        subject_token_ref_data = json.load(f)
+
+        for subject_token_ref in tqdm(
+            subject_token_ref_data["subject_token_refs"],
+            desc=f"\t create subject_token_refs",
+        ):
+            subject = Subject.objects.get(subject_id=subject_token_ref["subject_id"])
+            source_token = SourceToken.objects.get(
+                token_id=subject_token_ref["token_id"]
+            )
+            source_token.subjects.add(subject)
+
+
 def import_target_tokens(path, resource):
     to_create = {}
 
@@ -214,8 +231,6 @@ def import_media_assets():
             media_assets_data["media_assets"], desc=f"\t create media assets"
         ):
             related_subject = Subject.objects.get(subject_id=media_asset["subject"])
-            print("MIKE")
-            print(related_subject)
             new_media_asset = MediaAsset(
                 media_asset_id=media_asset["media_asset_id"],
                 dam_id=media_asset["dam_id"],
@@ -287,6 +302,9 @@ def load_alignments(reset=True):
         )
 
         import_links(alignment, source_resource, target_resource)
+
+    print(f"IMPORT SourceToken.Subject")
+    import_source_token_subjects()
 
 
 if __name__ in {"__main__", "django.core.management.commands.shell"}:
