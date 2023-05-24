@@ -1,0 +1,13 @@
+{
+  "media_assets": [
+    {
+      "media_asset_id": "Camel-1",
+      "dam_id": "",
+      "title": "Camel",
+      "subtitle": "A Camel with two humps.",
+      "description": "Isn't it a lovely camel?",
+      "asset_type": "PHOTO",
+      "subject": "animal-camel"
+    }
+  ]
+}

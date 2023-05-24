@@ -10,10 +10,19 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 from tqdm import tqdm
 
-from alignment_api.models import SourceToken, TargetToken, Resource, Alignment, Link
+from alignment_api.models import (
+    SourceToken,
+    TargetToken,
+    Resource,
+    Alignment,
+    Link,
+    MediaAsset,
+    Subject,
+)
 
 INTERNAL_DATA_PATH = settings.BASE_DIR / "data/internal-alignments/data"
 DATA_PATH = settings.BASE_DIR / "data/alignments/data"
+TEST_DATA_PATH = settings.BASE_DIR / "test_data"
 CATALOG_PATH = DATA_PATH / "catalog.tsv"
 
 SOURCES_PATH = INTERNAL_DATA_PATH / "sources"
@@ -25,7 +34,7 @@ def load_catalog():
     with open(CATALOG_PATH) as file:
         tsv_file = csv.reader(file, delimiter="\t")
         next(tsv_file)  # skip header
-        for line in tqdm(tsv_file, desc=f"import catalog"):
+        for line in tqdm(tsv_file, desc=f"IMPORT catalog"):
             identifier = line[0]
             format = line[1]
             alignment_license = line[2]
@@ -176,7 +185,53 @@ def import_links(alignment, source_resource, target_resource):
                 created_links[idx].target_tokens.add(*target_tokens)
 
 
+def import_subjects():
+    SUBJECTS_DATA_PATH = f"{TEST_DATA_PATH}/subjects.json"
+
+    with open(SUBJECTS_DATA_PATH, "r") as f:
+        subjects_data = json.load(f)
+        new_subjects = []
+
+        for subject in tqdm(subjects_data["subjects"], desc=f"\t create subjects"):
+            new_subject = Subject(
+                subject_id=subject["subject_id"],
+                name=subject["name"],
+                description=subject["description"],
+            )
+            new_subjects.append(new_subject)
+
+        created_subjects = Subject.objects.bulk_create(new_subjects)
+
+
+def import_media_assets():
+    MEDIA_ASSETS_DATA_PATH = f"{TEST_DATA_PATH}/media_assets.json"
+
+    with open(MEDIA_ASSETS_DATA_PATH, "r") as f:
+        media_assets_data = json.load(f)
+        new_media_assets = []
+
+        for media_asset in tqdm(
+            media_assets_data["media_assets"], desc=f"\t create media assets"
+        ):
+            related_subject = Subject.objects.get(subject_id=media_asset["subject"])
+            print("MIKE")
+            print(related_subject)
+            new_media_asset = MediaAsset(
+                media_asset_id=media_asset["media_asset_id"],
+                dam_id=media_asset["dam_id"],
+                title=media_asset["title"],
+                subtitle=media_asset["subtitle"],
+                description=media_asset["description"],
+                asset_type=media_asset["asset_type"],
+                subject=related_subject,
+            )
+            new_media_assets.append(new_media_asset)
+
+        created_media_assets = MediaAsset.objects.bulk_create(new_media_assets)
+
+
 def load_alignments(reset=True):
+
     if not DATA_PATH.exists():
         return
 
@@ -198,9 +253,21 @@ def load_alignments(reset=True):
         print(f"\t Link")
         Link.truncate()
 
+        print(f"\t Subject")
+        Subject.truncate()
+
+        print(f"\t MediaAsset")
+        MediaAsset.truncate()
+
     load_catalog()
 
-    for entry in CATALOG:
+    print(f"IMPORT Subject(s)")
+    import_subjects()
+
+    print(f"IMPORT MediaAsset(s)")
+    import_media_assets()
+
+    for entry in CATALOG[0:2]:
         name = f"{entry['source']}-{entry['target']}"
         print(f"INGEST {name}")
         source_resource = get_or_create_resource(entry["source"], entry["lang"])
