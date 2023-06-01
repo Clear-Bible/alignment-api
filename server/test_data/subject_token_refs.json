@@ -1,5 +1,5 @@
 {
   "subject_token_refs": [
-    { "subject_id": "animal-camel", "token_id": "400030040111" }
+    { "subject_id": "animal-camel", "token": "400030040111" }
   ]
 }
