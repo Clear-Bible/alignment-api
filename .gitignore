@@ -145,6 +145,7 @@ idea
 *.njsproj
 *.sln
 *.sw*
+*~
 
 
 
@@ -175,5 +176,6 @@ Thumbs.db
 *.rar
 *.tar
 *.zip
-.DS_Store
+
 /data
+
