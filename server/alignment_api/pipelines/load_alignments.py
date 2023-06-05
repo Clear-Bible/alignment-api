@@ -1,4 +1,5 @@
-"""
+"""Load alignment data.
+
 Usage: python manage.py shell < alignment_api/pipelines/load_alignments.py
 """
 import os
@@ -104,9 +105,7 @@ def import_source_tokens(path, resource):
 
     token_ids = list(to_create.keys())
     first_token_id = token_ids[0]
-    token_exists = SourceToken.objects.filter(
-        token_id=first_token_id, resource=resource
-    ).exists()
+    token_exists = SourceToken.objects.filter(token_id=first_token_id, resource=resource).exists()
 
     if not token_exists:
         print(f"\t bulk save")
@@ -124,9 +123,7 @@ def import_source_token_subjects():
             desc=f"\t create subject_token_refs",
         ):
             subject = Subject.objects.get(subject_id=subject_token_ref["subject_id"])
-            source_token = SourceToken.objects.get(
-                token_id=subject_token_ref["token_id"]
-            )
+            source_token = SourceToken.objects.get(token_id=subject_token_ref["token_id"])
             source_token.subjects.add(subject)
 
 
@@ -148,9 +145,7 @@ def import_target_tokens(path, resource):
         # TargetToken.objects.bulk_create(to_create.values())
     token_ids = list(to_create.keys())
     first_token_id = token_ids[0]
-    token_exists = TargetToken.objects.filter(
-        token_id=first_token_id, resource=resource
-    ).exists()
+    token_exists = TargetToken.objects.filter(token_id=first_token_id, resource=resource).exists()
 
     if not token_exists:
         print(f"\t bulk save")
@@ -179,10 +174,7 @@ def import_links(alignment, source_resource, target_resource):
         created_links = Link.objects.bulk_create(links)
 
         with transaction.atomic():
-            for idx, link in enumerate(
-                tqdm(alignment_data, desc=f"\t create link relationships")
-            ):
-
+            for idx, link in enumerate(tqdm(alignment_data, desc=f"\t create link relationships")):
                 id = list(link.keys())[0]
                 extracted_link = list(link.values())[0]
                 source_token_ids = extracted_link[source_resource.name]
@@ -227,9 +219,7 @@ def import_media_assets():
         media_assets_data = json.load(f)
         new_media_assets = []
 
-        for media_asset in tqdm(
-            media_assets_data["media_assets"], desc=f"\t create media assets"
-        ):
+        for media_asset in tqdm(media_assets_data["media_assets"], desc=f"\t create media assets"):
             related_subject = Subject.objects.get(subject_id=media_asset["subject"])
             new_media_asset = MediaAsset(
                 media_asset_id=media_asset["media_asset_id"],
@@ -246,7 +236,6 @@ def import_media_assets():
 
 
 def load_alignments(reset=True):
-
     if not DATA_PATH.exists():
         return
 
@@ -254,25 +243,25 @@ def load_alignments(reset=True):
         print(f"Reset...")
 
         print(f"\t Resource")
-        Resource.truncate()
+        Resource.objects.all().delete()
 
         print(f"\t SourceToken")
-        SourceToken.truncate()
+        SourceToken.objects.all().delete()
 
         print(f"\t TargetToken")
-        TargetToken.truncate()
+        TargetToken.objects.all().delete()
 
         print(f"\t Alignment")
-        Alignment.truncate()
+        Alignment.objects.all().delete()
 
         print(f"\t Link")
-        Link.truncate()
+        Link.objects.all().delete()
 
         print(f"\t Subject")
-        Subject.truncate()
+        Subject.objects.all().delete()
 
         print(f"\t MediaAsset")
-        MediaAsset.truncate()
+        MediaAsset.objects.all().delete()
 
     load_catalog()
 
@@ -297,9 +286,7 @@ def load_alignments(reset=True):
             target_resource,
         )
 
-        alignment = import_alignment(
-            name, source_resource, target_resource, entry["type"]
-        )
+        alignment = import_alignment(name, source_resource, target_resource, entry["type"])
 
         import_links(alignment, source_resource, target_resource)
 
