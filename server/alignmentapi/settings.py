@@ -83,7 +83,8 @@ WSGI_APPLICATION = "alignmentapi.wsgi.application"
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"https://vocal-piroshki-b3c6dc.netlify.app",  # Alignment API Frontend
     r"http://localhost",  # Local development
-    r"https://(?P<subdomain>.+){0,1}doric-symphony-preview.netlify.app", # Symphony Browser Deploy Previews
+    r"https://(?P<subdomain>.+){0,1}doric-symphony-preview.netlify.app",  # Legacy Symphony Browser Deploy Previews
+    r"https://(?P<subdomain>.+){0,1}symphony-preview.netlify.app",  # New Symphony Browser Deploy Preview
     r"https://labs.clear.bible",
 ]
 
