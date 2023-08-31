@@ -1,12 +1,12 @@
-"""Load external license data and save into Django."""
+"""Load external license data.
 
-from collections import UserDict
-from csv import DictReader
+Not much validation required since this is a simple input file.
+"""
 
 
 from pydantic import BaseModel  # , ValidationError, conint, constr
 
-from .config import LOADER_DATA_PATH
+from . import config
 
 
 class License(BaseModel):
@@ -23,17 +23,9 @@ class License(BaseModel):
     noncommercial: bool
 
 
-class Reader(UserDict):
+class Reader(config.Reader):
     """Read external data and marshall for loading into Django."""
 
-    tsvpath = LOADER_DATA_PATH / "license.tsv"
-
-    def __init__(self) -> None:
-        """Initialize a Reader instance."""
-        super().__init__()
-        with self.tsvpath.open() as f:
-            reader = DictReader(f, delimiter="\t")
-            for row in reader:
-                self.row = row
-                license_id = row["license_id"]
-                self.data[license_id] = License(**row)
+    tsvpath = config.LOADER_DATA_PATH / "license.tsv"
+    idattr = "license_id"
+    model = License

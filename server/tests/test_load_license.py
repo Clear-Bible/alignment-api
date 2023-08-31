@@ -30,4 +30,4 @@ class TestReader:
         """Test initialization."""
         cc0 = self.rd["CC0"]
         assert cc0.license_id == "CC0"
-        assert cc0.attribution == False
+        assert cc0.attribution is False
